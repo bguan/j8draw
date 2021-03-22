@@ -28,8 +28,6 @@ public class Tree2DFX extends Application {
 	Canvas canvas = new Canvas(MAX_WIDTH, MAX_HEIGHT);
 	GraphicsContext gc = canvas.getGraphicsContext2D();
 	{
-		gc.setFill(Color.RED);
-		gc.setStroke(Color.GREEN);
 		root.getChildren().add(canvas);
 	}
 
@@ -46,53 +44,55 @@ public class Tree2DFX extends Application {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	// constants useful for logic
-	final Point2D ORIGIN = new Point2D(MAX_WIDTH / 2, MAX_HEIGHT / 2);
-	final double ANGLE_SCALE = 0.75;
-	final double LENGTH_SCALE = 0.75;
+	final Point2D ORIGIN = new Point2D(MAX_WIDTH / 2, .9 * MAX_HEIGHT);
+	final double ANGLE_SCALE = 1;
+	final double LENGTH_SCALE = 0.85;
 
 	// draw a Tree by making initial call to drawBranch to start recursion chain
 	void drawTree() {
-		double initialAngle = Math.PI / 4;
-		double initialLength = -100;
-		int maxBranchDepth = 3;
-		drawBranch(ORIGIN, 0, initialAngle, initialLength, maxBranchDepth);
+		double initAngL = 45 * Math.PI / 180;
+		double initAngR = 15 * Math.PI / 180;
+		double initLen = -100;
+		int maxBranchDepth = 13;
+		drawBranch(ORIGIN, 0, initAngL, initAngR, initLen, maxBranchDepth);
 	}
 
 	// draw a branch starting at pos, pointing at direction dir, length of len,
 	// then draw 2 branches left and right from there, by +/- turn from dir,
 	// branching recursively up to depth level
-	void drawBranch(Point2D pos, double dir, double turn, double len, int dep) {
-		
+	void drawBranch(Point2D pos, double dir, double turnL, double turnR, double len, int dep) {
+
 		// if we've descended down to depth of 0 (or less) terminate recursion
-		if (dep <= 0) return;
+		if (dep <= 0)
+			return;
 
 		// draw a line of length from pos at angle (0' is Up, +ve is right)
 		// Use trigonometry to find next X, next Y
 
-		Point2D nextPos = new Point2D(
-			pos.getX() + len * Math.sin(dir),
-			pos.getY() + len * Math.cos(dir)
-		);
+		Point2D nextPos = new Point2D(pos.getX() + len * Math.sin(dir), pos.getY() + len * Math.cos(dir));
 
-		System.out.println(dep + ": draw from "+pos+" to "+nextPos);
+		System.out.println(dep + ": draw from " + pos + " to " + nextPos);
 
-		gc.setLineWidth(1);
+		gc.setLineWidth(dep);
+		gc.setStroke(Color.rgb(0, 255/dep, 0));
 		gc.strokeLine(pos.getX(), pos.getY(), nextPos.getX(), nextPos.getY());
 
-		//drawApple(pos, 2*dep);
-        
-		double nextDirLeft = dir - turn;
-		double nextDirRight = dir + turn;
-		double nextLength = len * LENGTH_SCALE;
-		double nextTurn = turn * ANGLE_SCALE;
+		if (dep%3==1 && Math.random() > .95) drawApple(nextPos, 2*dep+1, Color.RED);
 
-		drawBranch(nextPos, nextDirLeft, nextTurn, nextLength, dep - 1);
-		drawBranch(nextPos, nextDirRight, nextTurn, nextLength, dep - 1);
+		double nextDirLeft = dir - turnL;
+		double nextDirRight = dir + turnR;
+		double nextLength = len * LENGTH_SCALE * (.75 + Math.random()/4);
+		double nextTurnL = turnL * ANGLE_SCALE * (.75 + Math.random()/4);
+		double nextTurnR = turnR * ANGLE_SCALE * (.75 + Math.random()/4);
+
+		drawBranch(nextPos, nextDirLeft, nextTurnL, nextTurnR, nextLength, dep - 1);
+		drawBranch(nextPos, nextDirRight, nextTurnL, nextTurnR, nextLength, dep - 1);
 	}
 
 	// draw an apple at the position of radius
-	void drawApple(Point2D pos, double radius) {
-        gc.fillOval(pos.getX()-radius, pos.getY()-radius, 2*radius, 2*radius);
+	void drawApple(Point2D pos, double radius, Color c) {
+		gc.setFill(c);
+		gc.fillOval(pos.getX() - radius, pos.getY() - radius, 2 * radius, 2 * radius);
 	}
 
 }
